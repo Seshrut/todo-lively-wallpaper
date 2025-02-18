@@ -45,7 +45,7 @@ body {
     border-radius: 10px;
     margin-top: 1%;
     display: grid;
-    grid-template-columns: 85% 15%;
+    grid-template-columns: 80% 10% 10%;
 }
 .navbar{
     display: grid;
@@ -56,9 +56,11 @@ body {
     border: 0;
     font-size: 1vw;
     height: 4vh;
-    width: 2vw;
+    width: max-content;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: auto;
+    margin-top: auto;
     transition: font-size 0.2s, background-color 0.2s;
 }
 .button:hover{
@@ -90,14 +92,20 @@ body {
 
 .chkbx{
     display: inline;
-    margin-top: auto;
-    margin-bottom: auto;
     background-color: cornflowerblue;
 }
 .chkbx:active{
     background-color: rgb(69, 102, 161);
+    font-size: 1vw;
 }
 
+.del{
+    background-color: crimson;
+}
+.del:active{
+    background-color: rgb(126, 12, 35);
+    font-size: 1vw;
+}
 .done{
     text-decoration: line-through;
     text-decoration-color: rgba(255, 255, 255, 0.5);
