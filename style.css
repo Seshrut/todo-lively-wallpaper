@@ -32,6 +32,7 @@ body {
     border-radius: 10px;
     display: grid;
     grid-template-rows: 10% 90%;
+    overflow-y: auto;
 }
 #incomp{
     background-color: rgba(255,0,0,0.1);
