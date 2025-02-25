@@ -4,7 +4,18 @@ body {
     color: white;
     transition: background-image 1s ease-in-out;
 }
-
+::-webkit-scrollbar{
+    width: 2px;
+}
+::-webkit-scrollbar-track{
+    background-color:none;
+}
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 #todobox{
     height: 70vh;
     width: 30vw;
@@ -12,7 +23,7 @@ body {
     padding: 1%;
     backdrop-filter: blur(5px);
     display: grid;
-    grid-template-rows: auto auto;
+    grid-template-rows: 50% 50%;
     position: absolute;
     right: 2vw;
 }
@@ -21,17 +32,82 @@ body {
     border-radius: 10px;
     display: grid;
     grid-template-rows: 10% 90%;
+    overflow-y: auto;
 }
 #incomp{
     background-color: rgba(255,0,0,0.1);
 }
 #comp{
     background-color: rgba(0,0,255,0.1);
-    text-decoration: line-through;
 }
 .task{
     background-color: rgba(0,0,0,0.3);
     height:20%;
     border-radius: 10px;
     margin-top: 1%;
+    display: grid;
+    grid-template-columns: 80% 10% 10%;
+}
+.navbar{
+    display: grid;
+    grid-template-columns: 70% 30%;
+}
+.button{
+    border-radius: 5px;
+    border: 0;
+    font-size: 1vw;
+    height: 4vh;
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+    margin-top: auto;
+    transition: font-size 0.2s, background-color 0.2s;
+}
+.button:hover{
+    cursor: pointer;
+    font-size: 1.3vw;
+    z-index: 1;
+    transition: font-size 0.2s, background-color 0.2s;
+}
+.add{
+    background: chartreuse;
+}
+.add:active{
+    font-size: 1vw;
+    background-color: rgb(70, 138, 0);
+}
+.taskinp{
+    background: none;
+    color: white;
+    margin: 1%;
+    height: max-content;
+    outline: none;
+    background-repeat: no-repeat;
+    resize: none;
+    width: 80%;
+    font-size: 1vw;
+    text-decoration: none;
+    border: none;
+}
+
+.chkbx{
+    display: inline;
+    background-color: cornflowerblue;
+}
+.chkbx:active{
+    background-color: rgb(69, 102, 161);
+    font-size: 1vw;
+}
+
+.del{
+    background-color: crimson;
+}
+.del:active{
+    background-color: rgb(126, 12, 35);
+    font-size: 1vw;
+}
+.done{
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 255, 255, 0.5);
 }

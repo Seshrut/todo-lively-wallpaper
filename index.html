@@ -13,10 +13,14 @@
         <div id="incomp" class="tasklist">
             <div class="navbar">
                 TODO:
+                <button class=" button add" id="addtask">+</button>
             </div>
             <div id="tasks">
-                <div id="task1" class="task"></div>
-                <div id="task1" class="task"></div>
+                <div id="task1" class="task">
+                    <textarea id="task1inp" class="taskinp" spellcheck="false" placeholder="Enter Task"></textarea>
+                    <button class="button chkbx" id="task1btn">▢</button>
+                    <button class="button del" id="task1del" onclick="this.parentElement.remove()">🗑️</button>
+                </div>
             </div>
         </div>
         <div id="comp" class="tasklist">
@@ -24,7 +28,11 @@
                 DONE:
             </div>
             <div id="tasks">
-                <div id="task3" class="task"></div>
+                <div id="task2" class="task">
+                    <textarea id="task1inp" class="taskinp done" spellcheck="false" placeholder="Enter Task"></textarea>
+                    <button class="button chkbx" id="task1btn">✔</button>
+                    <button class="button del" id="task1del" onclick="this.parentElement.remove()">🗑️</button>
+                </div>
             </div>
         </div>
     </div>
