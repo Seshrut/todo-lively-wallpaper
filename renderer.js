@@ -18,7 +18,6 @@ window.onload = ()=>{
     function changebgimg(){
         let index = Math.floor(Math.random()*images.length)
         if(last5.includes(index) || index==0){
-            console.log(`re\n${index}\nRAN\n${last5}`);
             changebgimg()
             return;
         }
@@ -27,7 +26,6 @@ window.onload = ()=>{
         if(last5.length>5){
             last5.shift();
         }
-        console.log(`RAN\n${last5}`);
         setTimeout(changebgimg, 30000);
     }
     changebgimg();
