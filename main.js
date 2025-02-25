@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 function addnewtask(){
     //find a number not used in todolist yet;
-    console.log('ran function')
     var tasknum=1;
     while(tasknums.has(tasknum)){
         tasknum++;
@@ -29,6 +28,7 @@ function addnewtask(){
     chkbox.classList.add('button');
     chkbox.classList.add('chkbx');
     chkbox.innerHTML = '▢';
+    chkbox.addEventListener('click',()=>markasdone(chkbox));
     task.appendChild(chkbox);
     // add delete btn
     var delbtn = document.createElement('button');
@@ -45,6 +45,25 @@ function addnewtask(){
     document.getElementById('tasks').appendChild(task);
 };
 
-function markasdone(){
-
+function markasdone(that){
+    // move the parent div to comptasks
+    var task = that.parentElement;
+    if(task.parentElement.id == 'tasks'){
+        // change the checkbox to a checkmark
+        that.innerHTML = '✔';
+        // add proper class
+        document.getElementById(task.id+'inp').classList.add('done');
+        // move incomplete task to complete task
+        document.getElementById('comptasks').prepend(task);
+    }
+    else{
+        // move completed task back to tasks
+        document.getElementById('tasks').appendChild(task);
+        // change the checkbox to a circle
+        that.innerHTML = '▢';
+        // remove the done class
+        document.getElementById(task.id+'inp').classList.remove('done');
+        // move completed task back to tasks
+        document.getElementById('tasks').prepend(task);
+    };
 };
