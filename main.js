@@ -1,4 +1,4 @@
-var tasklist = {'todo':{'todo1':''},'done':{'todo2':'this task is done'}};
+var tasklist = {'tasks':{'task1':''},'comptasks':{'task2':''}};
 var tasknums = new Set([1,2]);
 var lastsync;
 document.addEventListener('DOMContentLoaded',()=>{
@@ -21,6 +21,7 @@ function addnewtask(){
     txtarea.classList.add('taskinp');
     txtarea.spellcheck = 'false';
     txtarea.placeholder = 'Enter Task';
+    txtarea.addEventListener('change', ()=>change(txtarea));
     task.appendChild(txtarea);
     // add checkbox
     var chkbox = document.createElement('button');
@@ -67,3 +68,8 @@ function markasdone(that){
         document.getElementById('tasks').prepend(task);
     };
 };
+
+function change(that){
+    tasklist[that.parentElement.parentElement.id][that.parentElement.id] = that.value;
+    console.log(tasklist);
+}

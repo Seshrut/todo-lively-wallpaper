@@ -17,7 +17,7 @@
             </div>
             <div id="tasks">
                 <div id="task1" class="task">
-                    <textarea id="task1inp" class="taskinp" spellcheck="false" placeholder="Enter Task"></textarea>
+                    <textarea id="task1inp" class="taskinp" spellcheck="false" placeholder="Enter Task" onchange="change(this)"></textarea>
                     <button class="button chkbx" id="task1btn" onclick="markasdone(this)">▢</button>
                     <button class="button del" id="task1del" onclick="this.parentElement.remove()">🗑️</button>
                 </div>
@@ -29,7 +29,7 @@
             </div>
             <div id="comptasks">
                 <div id="task2" class="task">
-                    <textarea id="task2inp" class="taskinp done" spellcheck="false" placeholder="Enter Task"></textarea>
+                    <textarea id="task2inp" class="taskinp done" spellcheck="false" placeholder="Enter Task"  onchange="change(this)"></textarea>
                     <button class="button chkbx" id="task2btn" onclick="markasdone(this)">✔</button>
                     <button class="button del" id="task2del" onclick="this.parentElement.remove()">🗑️</button>
                 </div>
