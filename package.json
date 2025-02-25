@@ -1,0 +1,23 @@
+{
+  "name": "lively-todo-wallpaper",
+  "version": "0.0.1",
+  "description": "A Todo wallpaper app for desktop",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Seshrut/todo-lively-wallpaper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Seshrut/todo-lively-wallpaper/issues"
+  },
+  "homepage": "https://github.com/Seshrut/todo-lively-wallpaper#readme",
+  "devDependencies": {
+    "electron": "^34.2.0"
+  }
+}
