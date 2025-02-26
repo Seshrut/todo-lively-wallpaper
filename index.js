@@ -1,32 +1,22 @@
-window.onload = ()=>{
+var images
+var last5=[]
+window.onload = async ()=>{
+    // try to load images in a folder
+    images = await window.img.get();
+    console.log(`from index: ${images}`);
     const body=document.querySelector('body');
-    const images=[
-        './img/1.jpg',
-        './img/2.jpg',
-        './img/3.png',
-        './img/4.png',
-        './img/5.jpg',
-        './img/6.jpg',
-        './img/7.png',
-        './img/8.jpg',
-        './img/9.jpg',
-        './img/10.jpg',
-        './img/11.png',
-        './img/12.png'
-    ]
-    var last5=[]
-    function changebgimg(){
-        let index = Math.floor(Math.random()*images.length)
-        if(last5.includes(index) || index==0){
-            changebgimg()
-            return;
-        }
-        body.style.backgroundImage=`url(${images[index]})`;
-        last5.push(index);
-        if(last5.length>5){
-            last5.shift();
-        }
-        setTimeout(changebgimg, 30000);
+    changebgimg(body);
+}
+function changebgimg(body){
+    let index = Math.floor(Math.random()*images.length)
+    if(last5.includes(index) || index==0){
+        changebgimg(body)
+        return;
     }
-    changebgimg();
+    body.style.backgroundImage=`url(img/${images[index]})`;
+    last5.push(index);
+    if(last5.length>5){
+        last5.shift();
+    }
+    setTimeout(()=>{changebgimg(body)}, 30000);
 }
