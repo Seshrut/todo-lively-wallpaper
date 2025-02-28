@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     addtaskbtn.onclick = addnewtask;
     // get stored
     var unparsedtasklist = await window.updates.getJson()
-    if(unparsedtasklist!={}){
+    if(unparsedtasklist!=null){
         tasklist = JSON.parse(unparsedtasklist);
         // add all tasks to the page
         console.log(tasklist);

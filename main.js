@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
 const fs = require('node:fs');
+const { stringify } = require('node:querystring');
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -62,8 +63,9 @@ ipcMain.handle('getJson', (event, args) => {
         reject(err);
         return;
       }
-      if(data==''){
-        resolve({});
+      console.log(`Data:\n[${data}]`);
+      if(data==''||data=="{}"){
+        resolve(null);
         return;
       }
       resolve(JSON.parse(data));
