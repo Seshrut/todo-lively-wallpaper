@@ -25,20 +25,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// ipcMain.handle('getimg',(event,args)=>{
-//   var filelist;
-//   fs.readdir(path.join(__dirname, 'img'),(err,files)=>{
-//     if(err){
-//       console.log(err);
-//       return;
-//     }
-//     console.log(`Files:\n${files}`);
-//     return;
-//   });
-//   console.log(`filelist:\n${filelist}`);
-//   return filelist
-// })
-ipcMain.handle('getimg', (event, args) => {
+// get images from directory
+ipcMain.handle('getImg', (event, args) => {
   return new Promise((resolve, reject) => {
     fs.readdir(path.join(__dirname, 'img'), (err, files) => {
       if (err) {
@@ -48,6 +36,37 @@ ipcMain.handle('getimg', (event, args) => {
       }
       console.log(`Files:\n${files}`);
       resolve(files);
+    });
+  });
+});
+
+// update json file
+ipcMain.handle('goJson', (event, args) => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(path.join(__dirname, 'tasklist.json'), JSON.stringify(args), (err) => {
+      if (err) {
+        console.log(err);
+        reject(err);
+        return;
+      }
+      resolve('success');
+    });
+  });
+});
+// get json file
+ipcMain.handle('getJson', (event, args) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path.join(__dirname, 'tasklist.json'), (err, data) => {
+      if (err) {
+        console.log(err);
+        reject(err);
+        return;
+      }
+      if(data==''){
+        resolve({});
+        return;
+      }
+      resolve(JSON.parse(data));
     });
   });
 });

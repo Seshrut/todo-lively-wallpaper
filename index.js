@@ -2,8 +2,7 @@ var images
 var last5=[]
 window.onload = async ()=>{
     // try to load images in a folder
-    images = await window.img.get();
-    console.log(`from index: ${images}`);
+    images = await window.onstart.getImg();
     const body=document.querySelector('body');
     changebgimg(body);
 }

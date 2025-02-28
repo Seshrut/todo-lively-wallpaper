@@ -1,34 +1,29 @@
-var tasknums;
+var tasknums = new Set();
 var tasklist = {'tasks':{'task1':''},'comptasks':{'task2':''}};
 var lastsync;
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded',async()=>{
     const addtaskbtn = document.getElementById('addtask');
     addtaskbtn.onclick = addnewtask;
-    // get local storage if available
-    unparsedtasklist = localStorage.getItem('tasklist');
-    unparsedtasknums = localStorage.getItem('tasknums');
-    if(unparsedtasknums!=null){
-        tasknums = new Set(JSON.parse(unparsedtasknums));
-    }
-    else{
-        tasknums = new Set([1,2]);
-    }
-    console.log(tasknums);
-    if(unparsedtasklist!=null){
+    // get stored
+    var unparsedtasklist = await window.updates.getJson()
+    if(unparsedtasklist!={}){
         tasklist = JSON.parse(unparsedtasklist);
         // add all tasks to the page
         console.log(tasklist);
         for(var task in tasklist['tasks']){
+            tasknums.add(parseInt(task.slice(4)))
             addnewtask(parseInt(task.slice(4)));
             document.getElementById(task.slice(0,5)+'inp').value = tasklist['tasks'][task];
         };
         for(var task in tasklist['comptasks']){
+            tasknums.add(parseInt(task.slice(4)))
             addnewtask(parseInt(task.slice(4)));
             document.getElementById(task.slice(0,5)+'inp').value = tasklist['comptasks'][task];
             markasdone(document.getElementById(task+'btn'));
         };
     }
     else{
+        tasknums = new Set([1, 2]);
         addnewtask(1);
         addnewtask(2);
         markasdone(document.getElementById('task2btn'));
@@ -71,12 +66,10 @@ function addnewtask(taskn){
     delbtn.addEventListener('click',()=>{
         // remove from tasknums
         tasknums.delete(parseInt(task.id.slice(4)));
-        // save on browser
-        localStorage.setItem('tasknums', JSON.stringify(Array.from(tasknums)));
         // remove from tasklist
         delete tasklist[task.parentElement.id][task.id];
-        // save on browser
-        localStorage.setItem('tasklist', JSON.stringify(tasklist));
+        // save to json
+        window.updates.goJson(JSON.stringify(tasklist));
         task.remove();
     });
     task.appendChild(delbtn);
@@ -98,8 +91,8 @@ function markasdone(that){
         tasklist['comptasks'][task.id] = document.getElementById(task.id+'inp').value;
         // delete from tasklist
         delete tasklist['tasks'][task.id];
-        // save on browser
-        localStorage.setItem('tasklist', JSON.stringify(tasklist));
+        // save to json
+        window.updates.goJson(JSON.stringify(tasklist));
     }
     else{
         // move completed task back to tasks
@@ -114,14 +107,13 @@ function markasdone(that){
         tasklist['tasks'][task.id] = document.getElementById(task.id+'inp').value;
         // delete from tasklist
         delete tasklist['comptasks'][task.id];
-        // save on browser
-        localStorage.setItem('tasklist', JSON.stringify(tasklist));
+        // save to json
+        window.updates.goJson(JSON.stringify(tasklist));
     };
 };
 
 function change(that){
     tasklist[that.parentElement.parentElement.id][String(that.parentElement.id)] = that.value;
-    console.log(tasklist);
-    // save on browser
-    localStorage.setItem('tasklist', JSON.stringify(tasklist));
+    // save to json
+    window.updates.goJson(JSON.stringify(tasklist));
 };
