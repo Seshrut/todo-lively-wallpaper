@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
 const fs = require('node:fs');
-const { stringify } = require('node:querystring');
 
 const createWindow = () => {
   const win = new BrowserWindow({
