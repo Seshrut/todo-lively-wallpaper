@@ -48,6 +48,16 @@ ipcMain.handle('getImg', (event, args) => {
 
 // update json file
 ipcMain.handle('goJson', (event, args) => {
+  fetch("http://localhost/task",{
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(args)
+  })
+  .then(response => response.json())
+  .then(data => {console.log(data);})
+  .catch(error => {console.error(error);});
   return new Promise((resolve, reject) => {
     fs.writeFile(path.join(location , 'tasklist.json'), JSON.stringify(args), (err) => {
       if (err) {
@@ -63,6 +73,15 @@ ipcMain.handle('goJson', (event, args) => {
 ipcMain.handle('getJson', (event, args) => {
   console.log(location)
   return new Promise((resolve, reject) => {
+    fetch("http://localhost:8080/task",{
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then(response => response.json())
+    .then(data => {console.log(data);resolve(data)})
+    .catch(error => {console.error(error);});
     if(!fs.existsSync(path.join(location, 'tasklist.json'))){
       fs.writeFile(path.join(location, 'tasklist.json'), '', (err) => {
         if (err) {
