@@ -1,14 +1,20 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const path = require('path');
-
 const app = express();
+const port = 8080;
 
-app.set('view engine', 'ejs');
+app.use(cors());
+app.use(bodyParser.json());
 
-app.listen(8080, () => {
-    console.log('Server is running on http://localhost:3000');
+app.use(express.static(path.join(__dirname)));
+
+app.post('/task', (req, res) => {
+    console.log("Received POST request:", req.body);
+    res.json({ message: "Data received successfully" });
 });
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
 });
