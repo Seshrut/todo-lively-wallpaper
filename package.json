@@ -4,7 +4,7 @@
   "description": "A Todo wallpaper app for desktop",
   "main": "main.js",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "electron .",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish"
@@ -33,7 +33,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon":"./src/icon.ico"
+        "icon": "./src/icon.ico"
       },
       "makers": [
         {
@@ -60,6 +60,9 @@
     }
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
+    "ejs": "^3.1.10",
+    "electron-squirrel-startup": "^1.0.1",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9"
   }
 }
