@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
 const fs = require('node:fs');
+if(require('electron-squirrel-startup'))app.quit()
+var location = path.join(process.env.APPDATA,'lively-todo');
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -20,6 +22,9 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+  if(!fs.existsSync(location)){
+    fs.mkdirSync(location);
+  }
 });
 
 app.on('window-all-closed', () => {
@@ -44,7 +49,7 @@ ipcMain.handle('getImg', (event, args) => {
 // update json file
 ipcMain.handle('goJson', (event, args) => {
   return new Promise((resolve, reject) => {
-    fs.writeFile(path.join(__dirname, 'tasklist.json'), JSON.stringify(args), (err) => {
+    fs.writeFile(path.join(location , 'tasklist.json'), JSON.stringify(args), (err) => {
       if (err) {
         console.log(err);
         reject(err);
@@ -56,8 +61,20 @@ ipcMain.handle('goJson', (event, args) => {
 });
 // get json file
 ipcMain.handle('getJson', (event, args) => {
+  console.log(location)
   return new Promise((resolve, reject) => {
-    fs.readFile(path.join(__dirname, 'tasklist.json'), (err, data) => {
+    if(!fs.existsSync(path.join(location, 'tasklist.json'))){
+      fs.writeFile(path.join(location, 'tasklist.json'), '', (err) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+          return;
+        };
+        resolve(null);
+        return;
+      });
+    }
+    fs.readFile(path.join(location, 'tasklist.json'), (err, data) => {
       if (err) {
         console.log(err);
         reject(err);
