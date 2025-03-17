@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
 const fs = require('node:fs');
+const { json } = require('node:stream/consumers');
 if(require('electron-squirrel-startup'))app.quit()
 var location = path.join(process.env.APPDATA,'lively-todo');
 
@@ -48,14 +49,14 @@ ipcMain.handle('getImg', (event, args) => {
 
 // update json file
 ipcMain.handle('goJson', (event, args) => {
-  fetch("http://localhost/task",{
+  fetch("http://localhost:8080/task",{
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(args)
+    body: JSON.stringify(JSON.parse(args))
   })
-  .then(response => response.json())
+  .then(response =>{return response.json()})
   .then(data => {console.log(data);})
   .catch(error => {console.error(error);});
   return new Promise((resolve, reject) => {
@@ -79,7 +80,7 @@ ipcMain.handle('getJson', (event, args) => {
         "Content-Type": "application/json"
       }
     })
-    .then(response => response.json())
+    .then(response => {return response.json()})
     .then(data => {console.log(data);resolve(data)})
     .catch(error => {console.error(error);});
     if(!fs.existsSync(path.join(location, 'tasklist.json'))){
