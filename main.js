@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
 const fs = require('node:fs');
-const { json } = require('node:stream/consumers');
 if(require('electron-squirrel-startup'))app.quit()
 var location = path.join(process.env.APPDATA,'lively-todo');
 
