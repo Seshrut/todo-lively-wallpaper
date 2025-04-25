@@ -24,6 +24,12 @@ app.post('/task', (req, res) => {
     res.json({ message: "Data received successfully" });
 });
 
+app.post('/login',(req,res)=>{
+    console.log("Received POST request for login");
+    console.log(req.body);
+    res.json({message:"login recieved"})
+})
+
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
