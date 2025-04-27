@@ -10,5 +10,8 @@ contextBridge.exposeInMainWorld('updates',{
     },
     getJson:async(args)=>{
         return ipcRenderer.invoke('getJson', args).then((result)=>{return result});
+    },
+    getToken:async(args)=>{
+        return ipcRenderer.invoke('getToken', args).then((result)=>{return result});
     }
 });

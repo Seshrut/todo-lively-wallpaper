@@ -1,8 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
 const fs = require('node:fs');
+const Store = require('electron-store');
 if(require('electron-squirrel-startup'))app.quit()
 var location = path.join(process.env.APPDATA,'lively-todo');
+const store = new Store();
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -17,6 +19,18 @@ const createWindow = () => {
 
   win.loadFile('index.html');
 };
+const createloginwindow=()=>{
+  // open login page
+  const login = new BrowserWindow({
+    width: 800,
+    height: 600,
+    autoHideMenuBar: true,
+    webPreferences:{
+      preload: path.join(__dirname, 'preload.js')
+    }
+  });
+  login.loadFile('./login/login.html');
+}
 app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => {
@@ -25,9 +39,31 @@ app.whenReady().then(() => {
   if(!fs.existsSync(location)){
     fs.mkdirSync(location);
   }
+  // login if no token or token expired
+  if(!store.get('token')){
+    createloginwindow();
+  }
+  else{
+    // check if token is valid
+    fetch("http://localhost:8080/whoami",{
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${store.get('token')}`
+      }
+    })
+    .then(response => {return response.json()})
+    .then(data => {
+      if(data.message == "invalid token"){
+        createloginwindow();
+      }
+    })
+    .catch(error => {console.error(error);});
+  }
 });
 
 app.on('window-all-closed', () => {
+  store.delete('token'); // this can be removed later when proper token verification is added
   if (process.platform !== 'darwin') app.quit();
 });
 
@@ -44,6 +80,12 @@ ipcMain.handle('getImg', (event, args) => {
       resolve(files);
     });
   });
+});
+
+// get token
+ipcMain.handle('getToken', (event, args) => {
+  store.set('token', args);
+  console.log(store.get('token'));
 });
 
 // update json file

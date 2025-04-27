@@ -21,7 +21,8 @@ fetch("http://localhost:8080/login", {
     })
     .then((response) =>{return response.json()})
     .then((data) => {
-        console.log(data);
+        console.log(data.token);
+        window.updates.getToken(data.token)
     })
     .catch((error) => {
         console.error("Error:", error);

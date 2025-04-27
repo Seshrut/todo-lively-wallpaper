@@ -64,7 +64,9 @@
     "cors": "^2.8.5",
     "ejs": "^3.1.10",
     "electron-squirrel-startup": "^1.0.1",
+    "electron-store": "^8.2.0",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.9"
   }
 }
