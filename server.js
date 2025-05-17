@@ -1,6 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost:27017/todoapp');
 
 const PORT = 8080;
 const app = express();
@@ -8,12 +11,22 @@ app.use(express.json());
 
 const JWT_SECRET = 'your_super_secret_key';
 
-const users = [
-  { id: 'user1', username: 'user1', passwordHash: bcrypt.hashSync('pass1', 8) },
-  { id: 'user2', username: 'user2', passwordHash: bcrypt.hashSync('pass2', 8) }
-];
+const userSchema = new mongoose.Schema({
+  username: String,
+  passwordHash: String
+});
 
-const todo = {};
+const User = mongoose.model('User', userSchema);
+
+
+const todoSchema = new mongoose.Schema({
+  userId: String,
+  tasks: { type: Object, default: {} },
+  comptasks: { type: Object, default: {} }
+});
+
+const Todo = mongoose.model('Todo', todoSchema);
+
 
 app.listen(PORT, () => {
   console.log(`server online at http://localhost:${PORT}`);
@@ -23,16 +36,23 @@ app.get('/ping', (req, res) => {
   res.status(200).json({ message: 'pong' });
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = users.find(u => u.username === username);
-  if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
-    return res.status(401).json({ message: 'Invalid credentials' });
-  }
 
-  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ token });
+  try {
+    const user = await User.findOne({ username });
+
+    if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 });
+
 
 app.post('/signup', async (req, res) => {
   const { username, password } = req.body;
@@ -40,17 +60,23 @@ app.post('/signup', async (req, res) => {
   if (!username || !password)
     return res.status(400).json({ message: 'Username and password required' });
 
-  const exists = users.find(u => u.username === username);
+  const exists = await User.findOne({ username });
   if (exists)
     return res.status(409).json({ message: 'Username already taken' });
 
   const passwordHash = await bcrypt.hash(password, 8);
   const id = `user${Date.now()}`;
-  users.push({ id, username, passwordHash });
 
-  const token = jwt.sign({ id }, 'secretkey', { expiresIn: '7d' });
+  const newUser = new User({ id, username, passwordHash });
+  await newUser.save();
+
+  const newTodo = new Todo({ userId: id, tasks: {}, comptasks: {} });
+  await newTodo.save();
+
+  const token = jwt.sign({ userId: id }, JWT_SECRET, { expiresIn: '7d' });
   res.status(201).json({ token });
 });
+
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -66,83 +92,100 @@ function authenticateToken(req, res, next) {
   }
 }
 
-app.get('/', authenticateToken, (req, res) => {
+app.get('/', authenticateToken, async (req, res) => {
   const userId = req.userId;
-  if (!todo[userId]) todo[userId] = { comptasks: {}, tasks: {} };
-  res.status(200).send(todo[userId]);
+
+  let userTodo = await Todo.findOne({ userId });
+  if (!userTodo) {
+    userTodo = new Todo({ userId, comptasks: {}, tasks: {} });
+    await userTodo.save();
+  }
+
+  res.status(200).send({
+    comptasks: userTodo.comptasks,
+    tasks: userTodo.tasks
+  });
 });
 
-app.post('/', authenticateToken, (req, res) => {
+
+app.post('/', authenticateToken, async (req, res) => {
   const userId = req.userId;
-  if (!todo[userId]) todo[userId] = { comptasks: {}, tasks: {} };
+
+  let userTodo = await Todo.findOne({ userId });
+  if (!userTodo) {
+    userTodo = new Todo({ userId, comptasks: {}, tasks: {} });
+  }
 
   const { comptasks = {}, tasks = {} } = req.body;
 
   for (let taskID in comptasks) {
     let newID = taskID;
-    while (todo[userId].comptasks[newID] || todo[userId].tasks[newID]) {
+    while (userTodo.comptasks[newID] || userTodo.tasks[newID]) {
       newID += '_';
     }
-    todo[userId].comptasks[newID] = comptasks[taskID];
+    userTodo.comptasks[newID] = comptasks[taskID];
   }
 
   for (let taskID in tasks) {
     let newID = taskID;
-    while (todo[userId].tasks[newID] || todo[userId].comptasks[newID]) {
+    while (userTodo.tasks[newID] || userTodo.comptasks[newID]) {
       newID += '_';
     }
-    todo[userId].tasks[newID] = tasks[taskID];
+    userTodo.tasks[newID] = tasks[taskID];
   }
 
-  res.send(todo[userId]);
+  await userTodo.save();
+  res.send({ comptasks: userTodo.comptasks, tasks: userTodo.tasks });
 });
 
-app.patch('/', authenticateToken, (req, res) => {
+
+app.patch('/', authenticateToken, async (req, res) => {
   const userId = req.userId;
-  if (!todo[userId]) return res.sendStatus(404);
+  const userTodo = await Todo.findOne({ userId });
+  if (!userTodo) return res.sendStatus(404);
 
   const { comptasks = {}, tasks = {} } = req.body;
 
   for (let taskID in comptasks) {
-    if (todo[userId].tasks[taskID]) {
-      delete todo[userId].tasks[taskID];
+    if (userTodo.tasks[taskID]) {
+      delete userTodo.tasks[taskID];
     }
-    todo[userId].comptasks[taskID] = comptasks[taskID];
+    userTodo.comptasks[taskID] = comptasks[taskID];
   }
 
   for (let taskID in tasks) {
-    if (todo[userId].comptasks[taskID]) {
-      delete todo[userId].comptasks[taskID];
+    if (userTodo.comptasks[taskID]) {
+      delete userTodo.comptasks[taskID];
     }
-    todo[userId].tasks[taskID] = tasks[taskID];
+    userTodo.tasks[taskID] = tasks[taskID];
   }
 
-  res.send(todo[userId]);
+  await userTodo.save();
+  res.send({ comptasks: userTodo.comptasks, tasks: userTodo.tasks });
 });
 
-app.delete('/', authenticateToken, (req, res) => {
+
+app.delete('/', authenticateToken, async (req, res) => {
   const userId = req.userId;
-  if (!todo[userId]) return res.sendStatus(404);
+  const userTodo = await Todo.findOne({ userId });
+  if (!userTodo) return res.sendStatus(404);
 
   const { comptasks = [], tasks = [] } = req.body;
 
-  comptasks.forEach(id => delete todo[userId].comptasks[id]);
-  tasks.forEach(id => delete todo[userId].tasks[id]);
+  comptasks.forEach(id => delete userTodo.comptasks[id]);
+  tasks.forEach(id => delete userTodo.tasks[id]);
 
-  res.send(todo[userId]);
+  await userTodo.save();
+  res.send({ comptasks: userTodo.comptasks, tasks: userTodo.tasks });
 });
 
+app.get('/whoami', authenticateToken, async (req, res) => {
+  const user = await User.findOne({ id: req.userId });
+  if (!user) return res.status(404).json({ message: 'invalid token' });
 
-app.get('/whoami', authenticateToken, (req, res) => {
-  const user = users.find(u => u.id === req.userId);
-  if (!user) {
-    return res.status(404).json({ message: 'invalid token' });
-  }
-  res.send({ 
-    id: user.id,
-    username: user.username
-  });
+  res.send({ id: user.id, username: user.username });
 });
+
 /*
 POST /login HTTP/1.1
 Host: localhost:8080
