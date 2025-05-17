@@ -34,6 +34,24 @@ app.post('/login', (req, res) => {
   res.json({ token });
 });
 
+app.post('/signup', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password)
+    return res.status(400).json({ message: 'Username and password required' });
+
+  const exists = users.find(u => u.username === username);
+  if (exists)
+    return res.status(409).json({ message: 'Username already taken' });
+
+  const passwordHash = await bcrypt.hash(password, 8);
+  const id = `user${Date.now()}`;
+  users.push({ id, username, passwordHash });
+
+  const token = jwt.sign({ id }, 'secretkey', { expiresIn: '7d' });
+  res.status(201).json({ token });
+});
+
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
