@@ -1,56 +1,183 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const path = require('path');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
+const PORT = 8080;
 const app = express();
-const port = 8080;
-const JWT_SECRET = 'your_jwt_secret';
+app.use(express.json());
 
-app.use(cors());
-app.use(bodyParser.json());
+const JWT_SECRET = 'your_super_secret_key';
 
-// app.use(express.static(path.join(__dirname)));
+const users = [
+  { id: 'user1', username: 'user1', passwordHash: bcrypt.hashSync('pass1', 8) },
+  { id: 'user2', username: 'user2', passwordHash: bcrypt.hashSync('pass2', 8) }
+];
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+const todo = {};
+
+app.listen(PORT, () => {
+  console.log(`server online at http://localhost:${PORT}`);
 });
 
-app.get('/task',(req,res)=>{
-    console.log("Received GET request for todo list");
-    res.json({message:"send todo"})
-})
-
-app.post('/task', (req, res) => {
-    console.log("Received POST request:", req.body);
-    res.json({ message: "Data received successfully" });
+app.get('/ping', (req, res) => {
+  res.status(200).json({ message: 'pong' });
 });
 
-app.get('/whoami',(req,res) => {
-    console.log("Received GET request for whoami");
-    // check if token is valid or expired
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) return res.status(401).json({ message: 'No token provided' });
-    const token = authHeader.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Invalid token format' });
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        // const user = users.find(u => u.id === decoded.userId);
-        // if (!user) return res.status(401).json({ message: 'User not found' });
-        // res.json({ username: user.username });
-        res.json({ message: 'valid token' });
-      } catch (err) {
-        res.status(401).json({ message: 'Invalid token' });
-      }
-})
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find(u => u.username === username);
+  if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
 
-app.post('/login',(req,res)=>{
-    console.log("Received POST request for login");
-    console.log(req.body);
-    res.json({token:"123123###"})
-})
-
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ token });
 });
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch {
+    res.sendStatus(403);
+  }
+}
+
+app.get('/', authenticateToken, (req, res) => {
+  const userId = req.userId;
+  if (!todo[userId]) todo[userId] = { comptasks: {}, tasks: {} };
+  res.status(200).send(todo[userId]);
+});
+
+app.post('/', authenticateToken, (req, res) => {
+  const userId = req.userId;
+  if (!todo[userId]) todo[userId] = { comptasks: {}, tasks: {} };
+
+  const { comptasks = {}, tasks = {} } = req.body;
+
+  for (let taskID in comptasks) {
+    let newID = taskID;
+    while (todo[userId].comptasks[newID] || todo[userId].tasks[newID]) {
+      newID += '_';
+    }
+    todo[userId].comptasks[newID] = comptasks[taskID];
+  }
+
+  for (let taskID in tasks) {
+    let newID = taskID;
+    while (todo[userId].tasks[newID] || todo[userId].comptasks[newID]) {
+      newID += '_';
+    }
+    todo[userId].tasks[newID] = tasks[taskID];
+  }
+
+  res.send(todo[userId]);
+});
+
+app.patch('/', authenticateToken, (req, res) => {
+  const userId = req.userId;
+  if (!todo[userId]) return res.sendStatus(404);
+
+  const { comptasks = {}, tasks = {} } = req.body;
+
+  for (let taskID in comptasks) {
+    if (todo[userId].tasks[taskID]) {
+      delete todo[userId].tasks[taskID];
+    }
+    todo[userId].comptasks[taskID] = comptasks[taskID];
+  }
+
+  for (let taskID in tasks) {
+    if (todo[userId].comptasks[taskID]) {
+      delete todo[userId].comptasks[taskID];
+    }
+    todo[userId].tasks[taskID] = tasks[taskID];
+  }
+
+  res.send(todo[userId]);
+});
+
+app.delete('/', authenticateToken, (req, res) => {
+  const userId = req.userId;
+  if (!todo[userId]) return res.sendStatus(404);
+
+  const { comptasks = [], tasks = [] } = req.body;
+
+  comptasks.forEach(id => delete todo[userId].comptasks[id]);
+  tasks.forEach(id => delete todo[userId].tasks[id]);
+
+  res.send(todo[userId]);
+});
+
+
+app.get('/whoami', authenticateToken, (req, res) => {
+  const user = users.find(u => u.id === req.userId);
+  if (!user) {
+    return res.status(404).json({ message: 'invalid token' });
+  }
+  res.send({ 
+    id: user.id,
+    username: user.username
+  });
+});
+/*
+POST /login HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+Content-Length: 51
+
+{
+  "username": "user1",
+  "password": "pass1"
+}
+
+GET / HTTP/1.1
+Host: localhost:8080
+Authorization: Bearer <YOUR_JWT_TOKEN>
+
+POST / HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+Authorization: Bearer <YOUR_JWT_TOKEN>
+Content-Length: 102
+
+{
+  "comptasks": {
+    "task123": "Buy groceries"
+  },
+  "tasks": {
+    "task456": "Finish homework"
+  }
+}
+
+PATCH / HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+Authorization: Bearer <YOUR_JWT_TOKEN>
+Content-Length: 118
+
+{
+  "tasks": {
+    "task123": "Buy groceries (tasks)"
+  },
+  "comptasks": {
+    "task456": "Finish homework (reopened)"
+  }
+}
+
+DELETE / HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+Authorization: Bearer <YOUR_JWT_TOKEN>
+Content-Length: 56
+
+{
+  "comptasks": ["task456"],
+  "tasks": ["task123"]
+}
+*/

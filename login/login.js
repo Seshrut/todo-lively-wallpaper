@@ -9,23 +9,20 @@ if(!email || !password){
     return;
 }
 //send to server at localhost:8080/login
-fetch("http://localhost:8080/login", {
+  fetch("http://localhost:8080/login", {
     method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-        email: email,
-        password: password,
-    }),
-    })
-    .then((response) =>{return response.json()})
-    .then((data) => {
-        console.log(data.token);
-        window.updates.getToken(data.token)
-    })
-    .catch((error) => {
-        console.error("Error:", error);
-    });
-
-};
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username:email, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.token){
+      window.Login.sendLoginSuccess(data.token);
+    } else {
+      window.Login.sendLoginFailed();
+    }
+  })
+  .catch(() => {
+    window.Login.sendLoginFailed();
+  });
+}
