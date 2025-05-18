@@ -2,14 +2,49 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
+const Joi = require('joi');
+require('dotenv').config()
 
 mongoose.connect('mongodb://localhost:27017/todoapp');
 
 const PORT = 8080;
 const app = express();
+const JWT_SECRET = process.env.JWT_SECRET;
 app.use(express.json());
 
-const JWT_SECRET = 'your_super_secret_key';
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per window
+  message: { message: 'Too many attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const logsignSchema = Joi.object({
+  username: Joi.string().alphanum().min(3).max(30).required(),
+  password: Joi.string().min(6).max(128).required()
+});
+
+const taskObjectSchema = Joi.object().pattern(
+  Joi.string().pattern(/^task\d+$/),  // task ID like task123
+  Joi.string().max(500)               // task description
+);
+
+const postpatchSchema = Joi.object({
+  tasks: taskObjectSchema.optional(),
+  comptasks: taskObjectSchema.optional()
+});
+
+const deleteSchema = Joi.object({
+  tasks: Joi.array().items(
+    Joi.string().pattern(/^task\d+$/)
+  ).optional(),
+
+  comptasks: Joi.array().items(
+    Joi.string().pattern(/^task\d+$/)
+  ).optional()
+});
 
 const userSchema = new mongoose.Schema({
   username: String,
@@ -17,7 +52,6 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('User', userSchema);
-
 
 const todoSchema = new mongoose.Schema({
   userId: String,
@@ -27,7 +61,6 @@ const todoSchema = new mongoose.Schema({
 
 const Todo = mongoose.model('Todo', todoSchema);
 
-
 app.listen(PORT, () => {
   console.log(`server online at http://localhost:${PORT}`);
 });
@@ -36,7 +69,9 @@ app.get('/ping', (req, res) => {
   res.status(200).json({ message: 'pong' });
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', authLimiter, async (req, res) => {
+  const {error} = logsignSchema.validate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
   const { username, password } = req.body;
 
   try {
@@ -53,15 +88,15 @@ app.post('/login', async (req, res) => {
   }
 });
 
-
-app.post('/signup', async (req, res) => {
+app.post('/signup', authLimiter, async (req, res) => {
+  const {error} = logsignSchema.validate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
   const { username, password } = req.body;
 
   if (!username || !password)
     return res.status(400).json({ message: 'Username and password required' });
 
-  const exists = await User.findOne({ username });
-  if (exists)
+  if (await User.findOne({ username }))
     return res.status(409).json({ message: 'Username already taken' });
 
   const passwordHash = await bcrypt.hash(password, 8);
@@ -77,7 +112,6 @@ app.post('/signup', async (req, res) => {
   res.status(201).json({ token });
 });
 
-
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
@@ -92,7 +126,7 @@ function authenticateToken(req, res, next) {
   }
 }
 
-app.get('/', authenticateToken, async (req, res) => {
+app.get('/task', authenticateToken, async (req, res) => {
   const userId = req.userId;
 
   let userTodo = await Todo.findOne({ userId });
@@ -107,8 +141,9 @@ app.get('/', authenticateToken, async (req, res) => {
   });
 });
 
-
-app.post('/', authenticateToken, async (req, res) => {
+app.post('/task', authenticateToken, async (req, res) => {
+  const { error } = postpatchSchema.validate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
   const userId = req.userId;
 
   let userTodo = await Todo.findOne({ userId });
@@ -138,8 +173,9 @@ app.post('/', authenticateToken, async (req, res) => {
   res.send({ comptasks: userTodo.comptasks, tasks: userTodo.tasks });
 });
 
-
-app.patch('/', authenticateToken, async (req, res) => {
+app.patch('/task', authenticateToken, async (req, res) => {
+  const { error } = postpatchSchema.validate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
   const userId = req.userId;
   const userTodo = await Todo.findOne({ userId });
   if (!userTodo) return res.sendStatus(404);
@@ -164,8 +200,9 @@ app.patch('/', authenticateToken, async (req, res) => {
   res.send({ comptasks: userTodo.comptasks, tasks: userTodo.tasks });
 });
 
-
-app.delete('/', authenticateToken, async (req, res) => {
+app.delete('/task', authenticateToken, async (req, res) => {
+  const { error } = deleteSchema.validate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });  
   const userId = req.userId;
   const userTodo = await Todo.findOne({ userId });
   if (!userTodo) return res.sendStatus(404);

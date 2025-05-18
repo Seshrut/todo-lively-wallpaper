@@ -161,7 +161,7 @@ ipcMain.handle('getImg', (event, args) => {
 //GET task
 function GETjson(){
     return new Promise((resolve, reject) => {
-        fetch(`${URI}/`,{
+        fetch(`${URI}/task`,{
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -182,7 +182,7 @@ ipcMain.handle('GETjson', async (event, args) => {
 // POST new task
 function POSTjson(args){
     return new Promise((resolve, reject) => {
-        fetch(`${URI}/`,{
+        fetch(`${URI}/task`,{
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -213,7 +213,7 @@ ipcMain.handle('POSTjson',async (event, args)=>{
 // PATCH task
 function PATCHjson(args){
     return new Promise((resolve, reject) => {
-        fetch(`${URI}/`,{
+        fetch(`${URI}/task`,{
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -244,7 +244,7 @@ ipcMain.handle('PATCHjson',(event, args)=>{
 // DELETE task
 function DELETEjson(args){
     return new Promise((resolve, reject) => {
-        fetch(`${URI}/`,{
+        fetch(`${URI}/task`,{
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
