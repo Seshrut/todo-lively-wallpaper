@@ -26,6 +26,7 @@ body {
     grid-template-rows: 50% 50%;
     position: absolute;
     right: 2vw;
+    z-index: 1;
 }
 .tasklist{
     padding: 1%;
@@ -110,4 +111,54 @@ body {
 .done{
     text-decoration: line-through;
     text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+#setting{
+    position: absolute;
+    background-color: #555;
+    width: 35px;
+    height: 35px;
+    right: 1vw;
+    margin-bottom: 2%;
+    border-radius: 4px;
+    padding-left: 5px;
+    padding-top: 5px;
+    z-index: 3;
+}
+#setting:active{
+    background-color: #888;
+}
+#settingmenu{
+    height: 98vh;
+    width: 99vw;
+    backdrop-filter: blur(5px);
+    position: absolute;
+    z-index: 2;
+    text-align: center;
+    justify-content: center;
+    display: none;
+    flex-direction: column;
+}
+
+#IPinp{
+    display: flex;
+    flex-direction: column;
+}
+
+#serverIP{
+    text-align: center;
+    background-color: #555;
+    width: 15vw;
+    padding:0.5%;
+    padding-top: 1%;
+    border-radius: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#logout{
+    padding: 1%;
+    padding-bottom: 2%;
+}
+#logout:active{
+    background-color: #555;
 }
