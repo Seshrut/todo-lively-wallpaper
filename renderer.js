@@ -66,6 +66,7 @@ function addnewtask(empty,id,data,done){
         // remove from tasklist
         delete tasklist[task.parentElement.id][task.id];
         // send delete request
+        window.updates.DELETEjson(JSON.stringify({[task.parentElement.id]:[task.id]}));
         // // save to json
         // window.updates.goJson(JSON.stringify(tasklist));
         task.remove();

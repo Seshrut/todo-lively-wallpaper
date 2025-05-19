@@ -47,6 +47,7 @@ const deleteSchema = Joi.object({
 });
 
 const userSchema = new mongoose.Schema({
+  userId: String,
   username: String,
   passwordHash: String
 });
@@ -81,7 +82,7 @@ app.post('/login', authLimiter, async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.userId }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -100,15 +101,15 @@ app.post('/signup', authLimiter, async (req, res) => {
     return res.status(409).json({ message: 'Username already taken' });
 
   const passwordHash = await bcrypt.hash(password, 8);
-  const id = `user${Date.now()}`;
+  const userId = `user${Date.now()}`;
 
-  const newUser = new User({ id, username, passwordHash });
+  const newUser = new User({ userId, username, passwordHash });
   await newUser.save();
 
-  const newTodo = new Todo({ userId: id, tasks: {}, comptasks: {} });
+  const newTodo = new Todo({ userId: userId, tasks: {}, comptasks: {} });
   await newTodo.save();
 
-  const token = jwt.sign({ userId: id }, JWT_SECRET, { expiresIn: '7d' });
+  const token = jwt.sign({ userId: userId }, JWT_SECRET, { expiresIn: '7d' });
   res.status(201).json({ token });
 });
 
@@ -211,6 +212,8 @@ app.delete('/task', authenticateToken, async (req, res) => {
 
   comptasks.forEach(id => delete userTodo.comptasks[id]);
   tasks.forEach(id => delete userTodo.tasks[id]);
+  userTodo.markModified('comptasks');
+  userTodo.markModified('tasks');
 
   await userTodo.save();
   res.send({ comptasks: userTodo.comptasks, tasks: userTodo.tasks });
