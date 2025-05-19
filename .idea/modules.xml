@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Todo-Lively wallpapers.iml" filepath="$PROJECT_DIR$/.idea/Todo-Lively wallpapers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/todo-lively-wallpapers/todo-lively-wallpapers.iml" filepath="$PROJECT_DIR$/backend/todo-lively-wallpapers/todo-lively-wallpapers.iml" />
     </modules>
   </component>
 </project>

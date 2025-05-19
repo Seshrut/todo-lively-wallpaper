@@ -1,4 +1,4 @@
-HELP.md
+backend/todo-lively-wallpapers/HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode
+
+### Environment variables ###
+.env
+application.properties
+
