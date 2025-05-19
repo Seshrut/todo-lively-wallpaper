@@ -4,9 +4,10 @@ const fs = require('node:fs');
 const Store = require('electron-store');
 if(require('electron-squirrel-startup'))app.quit()
 const store = new Store();
-const URI = "http://localhost:8080";
+var URI = "http://localhost:8080";
 var unsynced;// [{body:___,type:___}]
 var win;
+var login;
 const createWindow = () => {
    win = new BrowserWindow({
     width: 800,
@@ -22,7 +23,7 @@ const createWindow = () => {
 };
 const createloginwindow = () => {
   return new Promise((resolve, reject) => {
-    const login = new BrowserWindow({
+    login = new BrowserWindow({
       width: 800,
       height: 600,
       autoHideMenuBar: true,
@@ -48,8 +49,8 @@ const createloginwindow = () => {
   });
 };
 app.on('window-all-closed', () => {
-  store.delete('token'); // this can be removed later when proper token verification is added
-  store.delete('unsynced'); // this is just for testing login
+  store.delete('token'); // this can be removed later when making exe
+//   store.delete('unsynced'); // this WAS just for testing login
   if (process.platform !== 'darwin') app.quit();
 });
 function checkConnectivity(){
@@ -75,8 +76,7 @@ function checkConnectivity(){
     })
 }
 
-app.whenReady().then(async() => {
-    createWindow();
+async function syncProcedure() {
     if(await checkConnectivity()){
         if(store.get('token')){
             fetch(`${URI}/whoami`,{
@@ -141,6 +141,12 @@ app.whenReady().then(async() => {
           var newdata = await GETjson();
           win.webContents.send('login-success',newdata);
     }
+    return;
+}
+
+app.whenReady().then(async() => {
+    createWindow();
+    await syncProcedure();
 });
 
 // get images from directory
@@ -157,6 +163,31 @@ ipcMain.handle('getImg', (event, args) => {
     });
   });
 });
+
+ipcMain.on('setURL',(event,uri)=>{
+    if(uri&&uri!=URI){
+        URI = uri;
+        store.delete('token');
+        store.delete('unsynced');
+        try{
+        login.close();
+        }
+        catch{
+            //no login was open
+        }
+        syncProcedure();
+    }
+})
+
+ipcMain.handle('getURL',(event,args)=>{
+    return URI;
+})
+
+ipcMain.on('logout',(event, args)=>{
+    store.delete('token');
+    store.delete('unsynced');
+    createloginwindow();
+})
 
 //GET task
 function GETjson(){

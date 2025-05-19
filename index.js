@@ -6,21 +6,25 @@ window.onload = async ()=>{
     var closeico = document.getElementById("close");
     var gearico = document.getElementById("gear");
     var settingmenu = document.getElementById("settingmenu");
-    var menuvis=true;
+    var menuInvis=true;
     setting.addEventListener('click',()=>{
-        if(menuvis){
+        if(menuInvis){
             closeico.style.display='block';
             gearico.style.display='none';
             settingmenu.style.display='flex';
-            menuvis=false;
+            menuInvis=false;
         }
         else{
             closeico.style.display='none';
             gearico.style.display='block';
             settingmenu.style.display='none';
-            menuvis=true;
+            menuInvis=true;
+            window.onstart.setURL(document.getElementById('serverIP').value)
         }
     });
+    document.getElementById('logout').addEventListener('click',()=>{
+        window.onstart.logout();
+    })
     // try to load images in a folder
     images = await window.onstart.getImg();
     const body=document.querySelector('body');

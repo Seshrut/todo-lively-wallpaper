@@ -2,7 +2,10 @@ const {contextBridge, ipcRenderer} = require('electron');
 contextBridge.exposeInMainWorld('onstart',{
     getImg:async(args)=>{
         return ipcRenderer.invoke('getImg',args).then((result)=>{return result})
-    }
+    },
+    getURL:async ()=>ipcRenderer.invoke('getURL').then((result)=>{return result}),
+    setURL:async(args)=>ipcRenderer.send('setURL', args),
+    logout:async()=>ipcRenderer.send('logout')
 });
 contextBridge.exposeInMainWorld('updates',{
     GETjson:async(args)=>{

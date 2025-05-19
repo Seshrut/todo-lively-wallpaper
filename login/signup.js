@@ -1,5 +1,9 @@
 var email;
 var password;
+var URI;
+document.addEventListener('DOMContentLoaded',async()=>{
+  URI = await window.onstart.getURL();
+})
 function btnpress(){
     email = document.getElementById("emailinp").value;
     password = document.getElementById("passwordinp").value;
@@ -15,7 +19,7 @@ function btnpress(){
         return;
     }
     //send to server at localhost:8080/login
-    fetch("http://localhost:8080/signup", {
+    fetch(URI+"/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username:email, password })
