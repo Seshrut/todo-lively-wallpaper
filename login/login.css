@@ -1,0 +1,88 @@
+body {
+    background: black;
+    background-size:cover;
+    color: white;
+    transition: background-image 1s ease-in-out;
+}
+input{
+    padding-left: 1vw;
+    padding-right: 1vw;
+    width: 80%;
+}
+input:focus{
+    outline: none;
+}
+::-webkit-scrollbar{
+    width: 2px;
+}
+::-webkit-scrollbar-track{
+    background-color:none;
+}
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.box{
+    background-color: #1b1b1b;
+    border-style: solid;
+    border: 1px 1px;
+    border-color:#888;
+    margin-left: auto;
+    margin-right: auto;
+    height: fit-content;
+    width: 30%;
+    padding-left: 5%;
+    padding-right: 5%;
+    border-radius: 10px;
+    font-family: monospace;
+    display: grid;
+    grid-template-rows: auto auto auto auto auto;
+}
+#Login{
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 200%;
+}
+.field{
+    width: 100%;
+    margin-top: 4vh;
+    font-size: 125%;
+}
+#submit{
+    text-align: right;
+    font-size: 100%;
+    button{
+        font-weight: bolder;
+        color: black;
+        background-color:deepskyblue;
+        margin-right: 12%;
+        border-style: solid;
+        border-color: black;
+        border-radius: 10%;
+        padding: 2%;
+        cursor: pointer;
+        transition: background-color 100ms linear;
+    }
+    button:hover{
+        background-color: rgb(80, 211, 255);
+    }
+    button:active{
+        background-color: rgb(0, 145, 194);
+    }
+}
+#signup{
+    margin-left: auto;
+    margin-top: 10vw;
+    margin-bottom: 1vh;
+    border-style: solid;
+    border: 1px 1px;
+    border-radius: 3px;
+    border-color: #88888850;
+    padding: 2%;
+}
+#signup:hover{
+    border-color: #888;
+}
